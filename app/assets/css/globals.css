@@ -11,9 +11,9 @@
 }
 
 :root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --primary-light: #818cf8;
+  --primary: #cd4025;
+  --primary-dark: #a8321d; /* màu đậm hơn một chút */
+  --primary-light: #e15b3d; /* màu nhạt hơn một chút */
   --surface: #ffffff;
   --surface-dim: #f8fafc;
   --surface-hover: #f1f5f9;

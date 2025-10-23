@@ -9,7 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
+  padding: 16px 20px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -84,13 +84,16 @@
 }
 
 .navLinks a {
-  padding: 10px 20px;
+  padding: 10px 10px;
   text-decoration: none;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navLinks a:hover {
@@ -99,19 +102,14 @@
 }
 
 .refreshBtn {
-  background: var(--primary);
-  color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
-  font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.refreshBtn:hover {
-  background: var(--primary-dark);
+  background-color: transparent;
+  aspect-ratio: 1 / 1;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
@@ -121,12 +119,13 @@
 }
 
 .sidebar {
+  position: relative;
   width: 400px;
   min-width: 400px;
   background: var(--surface);
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 0;
   padding-bottom: 200px;
   overflow-y: auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -144,7 +143,7 @@
 }
 
 .sidebarHeader {
-  margin-bottom: 24px;
+  padding: 20px 20px 0;
 }
 
 .sidebarTitle {
@@ -162,9 +161,13 @@
 }
 
 .searchBar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: white;
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  padding: 20px;
 }
 
 .searchWrapper {
@@ -178,7 +181,8 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-tertiary);
-  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 .searchWrapper input {
@@ -201,24 +205,16 @@
 }
 
 .filterBtn {
-  background: var(--primary);
+  background: transparent;
   color: white;
   border: none;
-  border-radius: var(--radius-lg);
-  padding: 0 20px;
   cursor: pointer;
-  font-size: 18px;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-md);
-}
-
-.filterBtn:hover {
-  background: var(--primary-dark);
 }
 
 .eventList {
   display: flex;
   flex-direction: column;
+  padding: 10px 20px 0;
 }
 
 .eventItem {
@@ -464,8 +460,78 @@
   padding: 32px;
 }
 
+.modalTopTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modalTopTitleAction {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.actionLikeEvent:hover {
+  color: var(--primary);
+}
+
+.actionShareEvent:hover {
+  color: blue;
+}
+
+.modalOrg {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.modalOrg img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+
+.modalBodySection {
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.modalBodySectionHead {
+  font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.modalBodySectionHead a {
+  color: var(--primary);
+  font-size: 14px;
+  text-decoration: none;
+  margin-left: 30px;
+}
+
+.modalBodySectionHead a:hover {
+  text-decoration: underline;
+}
+
+.modalBodySectionContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .modalTitle {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   margin-bottom: 16px;
   color: var(--text-primary);
@@ -476,11 +542,14 @@
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.7;
+  margin-top: 50px;
   margin-bottom: 24px;
+  padding: 0 !important;
 }
 
 .modalDescription img {
   max-width: 100%;
+  height: auto;
 }
 
 .infoGrid {

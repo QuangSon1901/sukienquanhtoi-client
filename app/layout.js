@@ -6,6 +6,13 @@ const inter = Inter({ subsets: ['latin', 'vietnamese'] });
 export const metadata = {
   title: 'Sự kiện quanh tôi',
   description: 'Tìm kiếm trải nghiệm độc đáo quanh bạn',
+  icons: {
+    icon: [
+      { url: '/assets/logos/logo-icon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/assets/logos/logo-icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/assets/logos/logo-icon.png',
+  },
 };
 
 export default function RootLayout({ children }) {

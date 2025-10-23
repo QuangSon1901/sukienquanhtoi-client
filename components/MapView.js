@@ -183,7 +183,14 @@ export default function MapView({ events, onBoundsChange, onMarkerClick }) {
             <h4>${event.title}</h4>
             ${isPast ? '<p style="color:#ef4444;font-weight:600">⚠️ Sự kiện đã qua</p>' : ''}
             <p><strong>📍</strong> ${event.address}</p>
-            <p><strong>📅</strong> ${new Date(event.startTime).toLocaleString('vi-VN')}</p>
+            <p><strong>📅</strong> ${new Date(event.startTime).toLocaleString('vi-VN', {
+                    weekday: 'long',   // Thứ hai, Thứ ba, ...
+                    day: '2-digit',    // 01–31
+                    month: '2-digit',  // 01–12
+                    year: 'numeric',   // 2025
+                    hour: '2-digit',   // 00–23
+                    minute: '2-digit', // 00–59
+                  })}</p>
             <button class="${styles.viewDetailBtn}" onclick="window.dispatchEvent(new CustomEvent('openEventModal', { detail: ${event.id} }))">
               Xem chi tiết
             </button>

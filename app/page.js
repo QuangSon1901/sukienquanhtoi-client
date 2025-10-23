@@ -14,7 +14,7 @@ const CACHE_KEY = 'sukienquanhtoi_events';
 const CACHE_EXPIRY_KEY = 'sukienquanhtoi_cache_expiry';
 const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
-export default function HomePage() {
+export default function MainPage() {
   const [allEvents, setAllEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loadedBounds, setLoadedBounds] = useState([]);
@@ -257,21 +257,21 @@ export default function HomePage() {
             ☰
           </button>
           <div className={styles.logo}>
-            <span>sukienquanhtoi</span>
+            <a href="/" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}><img style={{height: '2.5rem'}} src="/assets/logos/logo-header.png" alt="NiceTech" /></a>
           </div>
           <select 
             className={styles.citySelect}
             value={filters.city}
             onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
           >
-            <option value="hcm">TP. HCM</option>
-            <option value="hanoi">Hà Nội</option>
-            <option value="danang">Đà Nẵng</option>
+            <option value="hcm">TP. Hồ Chi Minh</option>
+            <option value="hanoi">TP. Hà Nội</option>
+            <option value="danang">TP. Đà Nẵng</option>
           </select>
         </div>
         <div className={styles.navLinks}>
-          <a href="#">Homepage</a>
-          <a href="#">About</a>
+          <a href="/home">Trang chủ</a>
+          <a href="/contact">Liên hệ</a>
           <button 
             className={styles.refreshBtn}
             onClick={() => {
@@ -282,7 +282,7 @@ export default function HomePage() {
               window.location.reload();
             }}
           >
-            🔄 Refresh
+            <img style={{height: '18px', width: '18px'}} src="/assets/icons/reload-icon.svg" alt="Refresh Page" />
           </button>
         </div>
       </header>
@@ -299,7 +299,7 @@ export default function HomePage() {
 
           <div className={styles.searchBar}>
             <div className={styles.searchWrapper}>
-              <span className={styles.searchIcon}>🔍</span>
+              <img className={styles.searchIcon} src="/assets/icons/search-icon.svg" alt="Search Events" />
               <input
                 type="text"
                 placeholder="Tìm kiếm sự kiện..."
@@ -311,7 +311,7 @@ export default function HomePage() {
               className={styles.filterBtn}
               onClick={() => setShowFilter(!showFilter)}
             >
-              ⚙️
+              <img style={{height: '30px', width: '30px'}} src="/assets/icons/filter-list-icon.svg" alt="Filter Events" />
             </button>
           </div>
 
@@ -351,7 +351,14 @@ export default function HomePage() {
                         </div>
                         <div className={styles.eventMetaItem}>
                           <span>📅</span>
-                          <span>{eventDate.toLocaleString('vi-VN')}</span>
+                          <span>{eventDate.toLocaleString('vi-VN', {
+                    weekday: 'long',   // Thứ hai, Thứ ba, ...
+                    day: '2-digit',    // 01–31
+                    month: '2-digit',  // 01–12
+                    year: 'numeric',   // 2025
+                    hour: '2-digit',   // 00–23
+                    minute: '2-digit', // 00–59
+                  })}</span>
                         </div>
                       </div>
                     </div>
@@ -422,35 +429,44 @@ export default function HomePage() {
             </div>
 
             <div className={styles.modalBody}>
+              <div className={styles.modalTopTitle}>
+                <span>{new Date(currentEvent.startTime).toLocaleString('vi-VN', {
+                    weekday: 'long',   // Thứ hai, Thứ ba, ...
+                    day: '2-digit',    // 01–31
+                    month: '2-digit',  // 01–12
+                    year: 'numeric',   // 2025
+                    hour: '2-digit',   // 00–23
+                    minute: '2-digit', // 00–59
+                  })}</span>
+                <div className={styles.modalTopTitleAction}>
+                  <span className={styles.actionLikeEvent} style={{display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer'}}><img style={{height: '16px', width: '16px'}} src="/assets/icons/love-icon.svg" alt="Like Event" /> Yêu thích</span>
+                  <span className={styles.actionShareEvent} style={{display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer'}}><img style={{height: '16px', width: '16px'}} src="/assets/icons/share-icon.svg" alt="Like Event" /> Chia sẻ</span>
+                </div>
+              </div>
               <h2 className={styles.modalTitle}>{currentEvent.title}</h2>
+              <div className={styles.modalOrg}>
+                <img src={currentEvent.orgLogoURL} alt="orgLogoURL" />
+                <p>{currentEvent.orgName}</p>
+              </div>
+              <div className={styles.modalBodySection}>
+                <p className={styles.modalBodySectionHead}>Thời gian <a href='#'>+ Thêm vào lịch</a></p>
+                <p className={styles.modalBodySectionContent}>&nbsp;&nbsp;📅&nbsp;&nbsp;&nbsp;{new Date(currentEvent.startTime).toLocaleString('vi-VN', {
+                    weekday: 'long',   // Thứ hai, Thứ ba, ...
+                    day: '2-digit',    // 01–31
+                    month: '2-digit',  // 01–12
+                    year: 'numeric',   // 2025
+                    hour: '2-digit',   // 00–23
+                    minute: '2-digit', // 00–59
+                  })}</p>
+              </div>
+              <div className={styles.modalBodySection}>
+                <p className={styles.modalBodySectionHead}>Địa điểm <a href='#'>+ Mở bản đồ</a></p>
+                <p className={styles.modalBodySectionContent}>&nbsp;&nbsp;📍&nbsp;&nbsp;&nbsp;{currentEvent.address}</p>
+              </div>
               <div 
                 className={`${styles.modalDescription} ql-editor`}
                 dangerouslySetInnerHTML={{ __html: currentEvent.description }}
               />
-
-              <div className={styles.infoGrid}>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoIcon}>📍</div>
-                  <div className={styles.infoContent}>
-                    <h5>Địa điểm</h5>
-                    <p>{currentEvent.address}</p>
-                  </div>
-                </div>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoIcon}>📅</div>
-                  <div className={styles.infoContent}>
-                    <h5>Thời gian</h5>
-                    <p>{new Date(currentEvent.startTime).toLocaleString('vi-VN')}</p>
-                  </div>
-                </div>
-                <div className={styles.infoItem}>
-                  <div className={styles.infoIcon}>🏢</div>
-                  <div className={styles.infoContent}>
-                    <h5>Đơn vị tổ chức</h5>
-                    <p>{currentEvent.orgName}</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
