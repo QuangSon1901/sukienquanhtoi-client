@@ -33,6 +33,12 @@ export default function MainPage() {
   
   const loadTimeoutRef = useRef(null);
   const mapActionsRef = useRef(null);
+  const isLoadingRef = useRef(false);
+  const allEventsRef = useRef([]);
+
+  useEffect(() => {
+    allEventsRef.current = allEvents;
+  }, [allEvents]);
 
   const cityCoords = {
     hcm: [10.776, 106.700],
@@ -41,7 +47,7 @@ export default function MainPage() {
   };
 
   // Cache functions
-  const saveToCache = (events) => {
+  const saveToCache = useCallback((events) => {
     try {
       const uniqueEvents = Array.from(
         new Map(events.map(e => [e.id, e])).values()
@@ -51,7 +57,7 @@ export default function MainPage() {
     } catch (e) {
       console.warn('Cache storage failed:', e);
     }
-  };
+  }, []);
 
   const getFromCache = () => {
     try {
@@ -99,17 +105,23 @@ export default function MainPage() {
   };
 
   const loadEvents = useCallback(async (bounds = null) => {
-    if (isLoading) return;
-
-    const cachedEvents = getFromCache();
-    if (cachedEvents.length > 0 && allEvents.length === 0) {
-      setAllEvents(cachedEvents);
-    }
-
-    if (bounds && !needsLoading(bounds)) {
+    if (isLoadingRef.current) {
+      console.log('Already loading, skip...');
       return;
     }
 
+    const cachedEvents = getFromCache();
+    if (cachedEvents.length > 0 && allEventsRef.current.length === 0) {
+      setAllEvents(cachedEvents);
+      allEventsRef.current = cachedEvents;
+    }
+
+    if (bounds && !needsLoading(bounds, loadedBounds)) {
+      console.log('Bounds already loaded, skip...');
+      return;
+    }
+
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -124,19 +136,24 @@ export default function MainPage() {
       if (filters.search) params.append('search', filters.search);
       if (filters.status) params.append('status', filters.status);
 
+      console.log('Calling API:', `/events?${params.toString()}`);
       const response = await axiosInstance.get(`/events?${params.toString()}`);
       
       if (response.data.success) {
-        const merged = mergeEvents(allEvents, response.data.events);
+        const merged = mergeEvents(allEventsRef.current, response.data.events);
         setAllEvents(merged);
+        allEventsRef.current = merged;
         saveToCache(merged);
+        console.log('Events loaded:', merged.length);
       }
     } catch (error) {
       console.error('Error loading events:', error);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [allEvents, filters, isLoading, loadedBounds]);
+  }, [filters.search, filters.status, expandBounds, needsLoading, loadedBounds, getFromCache, mergeEvents, saveToCache]); // ✅ Chỉ giữ filters cần thiết
+
 
   const applyFilters = useCallback(() => {
     let filtered = [...allEvents];
@@ -176,7 +193,6 @@ export default function MainPage() {
   }, [applyFilters]);
 
   useEffect(() => {
-    // Load initial events
     const initialBounds = {
       north: 10.876,
       south: 10.676,
@@ -184,7 +200,7 @@ export default function MainPage() {
       west: 106.600
     };
     loadEvents(initialBounds);
-  }, []);
+  }, [loadEvents]);
 
   useEffect(() => {
     const handleOpenModal = (e) => {
@@ -257,7 +273,7 @@ export default function MainPage() {
             ☰
           </button>
           <div className={styles.logo}>
-            <a href="/" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}><img style={{height: '2.5rem'}} src="/assets/logos/logo-header.png" alt="NiceTech" /></a>
+            <a href="/" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}><img style={{height: '2.5rem'}} src="/assets/logos/logo-header.png?v1.0.0" alt="NiceTech" /></a>
           </div>
           <select 
             className={styles.citySelect}

@@ -8,10 +8,10 @@ export const metadata = {
   description: 'Tìm kiếm trải nghiệm độc đáo quanh bạn',
   icons: {
     icon: [
-      { url: '/assets/logos/logo-icon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/assets/logos/logo-icon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/assets/logos/logo-icon.png?v1.0.0', sizes: '32x32', type: 'image/png' },
+      { url: '/assets/logos/logo-icon.png?v1.0.0', sizes: '192x192', type: 'image/png' },
     ],
-    apple: '/assets/logos/logo-icon.png',
+    apple: '/assets/logos/logo-icon.png?v1.0.0',
   },
 };
 
