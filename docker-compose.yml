@@ -1,7 +1,9 @@
-# docker-compose.yml
 services:
-  # Next.js Application Service
+  # ===================================
+  # DEVELOPMENT SERVICE
+  # ===================================
   app:
+    container_name: sukien-dev
     build:
       context: .
       dockerfile: ./docker/app/Dockerfile
@@ -20,43 +22,45 @@ services:
     command: npm run dev
     restart: unless-stopped
 
-  # Production Build Service (optional)
+  # ===================================
+  # PRODUCTION SERVICES
+  # ===================================
   app-prod:
+    container_name: sukien-prod
     build:
       context: .
       dockerfile: ./docker/app-prod/Dockerfile
+      target: runner
     volumes:
       - ./data:/app/data:ro
     ports:
       - "3001:3000"
     environment:
       - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=/api
     networks:
       - sukien-network
     restart: unless-stopped
     profiles:
       - production
 
-  # Nginx Reverse Proxy (optional, for production)
   nginx:
+    container_name: sukien-nginx
     build:
       context: ./docker/nginx
       dockerfile: Dockerfile
     volumes:
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "80:80"
     networks:
       - sukien-network
     depends_on:
       - app-prod
+    restart: unless-stopped
     profiles:
       - production
 
 networks:
   sukien-network:
     driver: bridge
-
-volumes:
-  node_modules:
-    driver: local
