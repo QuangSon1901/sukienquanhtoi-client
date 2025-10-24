@@ -283,6 +283,7 @@ export default function MainPage() {
             <option value="hcm">TP. Hồ Chi Minh</option>
             <option value="hanoi">TP. Hà Nội</option>
             <option value="danang">TP. Đà Nẵng</option>
+            <option value="phuyen">Phú Yên</option>
           </select>
         </div>
         <div className={styles.navLinks}>
