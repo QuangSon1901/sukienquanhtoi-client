@@ -99,7 +99,6 @@ deploy: ## Deploy production (rebuild + restart)
 
 prod-update: ## Update code và deploy lại
 	@echo "$(GREEN)Updating production...$(RESET)"
-	@git pull
 	@docker-compose --profile production down
 	@docker-compose --profile production build --no-cache
 	@docker-compose --profile production up -d
