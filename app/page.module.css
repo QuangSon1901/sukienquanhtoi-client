@@ -388,6 +388,20 @@
   margin-top: 8px;
 }
 
+.clearFilterBtn {
+  width: 100%;
+  padding: 14px;
+  background: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  margin-top: 8px;
+}
+
 .applyFilterBtn:hover {
   background: var(--primary-dark);
 }

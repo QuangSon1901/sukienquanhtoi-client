@@ -429,6 +429,11 @@ export default function MainPage() {
         >
           Áp dụng bộ lọc
         </button>
+        <button 
+          className={styles.clearFilterBtn}
+        >
+          Xóa lọc
+        </button>
       </div>
 
       {/* Modal */}
