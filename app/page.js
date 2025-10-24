@@ -310,7 +310,7 @@ export default function MainPage() {
         <div className={`${styles.sidebar} ${showSidebar ? styles.active : ''}`}>
           <div className={styles.sidebarHeader}>
             <h2 className={styles.sidebarTitle}>Khám phá sự kiện</h2>
-            <p className={styles.sidebarSubtitle}>Tìm kiếm trải nghiệm độc đáo quanh bạn</p>
+            <p className={styles.sidebarSubtitle}>Tìm kiếm trải nghiệm độc đáo xung quanh bạn</p>
           </div>
 
           <div className={styles.searchBar}>
