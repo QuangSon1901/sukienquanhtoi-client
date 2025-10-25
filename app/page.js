@@ -430,7 +430,7 @@ export default function MainPage() {
       }
 
       // if (filtersParams.search) params.append('search', filtersParams.search);
-      // if (filtersParams.status) params.append('status', filtersParams.status);
+      params.append('status', 'all');
       // if (filtersParams.popularity && filtersParams.popularity !== 'all') params.append('popularity', filtersParams.popularity);
       // if (filtersParams.ticketType && filtersParams.ticketType !== 'all') params.append('ticketType', filtersParams.ticketType);
       // if (filtersParams.types && filtersParams.types.length > 0) params.append('types', filtersParams.types.join(',')); // Join array into comma-separated string
