@@ -14,6 +14,12 @@ export const metadata = {
     ],
     apple: '/assets/logos/logo-icon.png?v1.0.0',
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({ children }) {

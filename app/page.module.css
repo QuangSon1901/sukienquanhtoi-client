@@ -177,6 +177,28 @@
   padding: 20px 20px 0;
 }
 
+.sidebarHeaderMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+
+.sidebarClose {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  display: none;
+}
+
+.sidebarClose:hover {
+  color: var(--primary);
+}
+
 .sidebarTitle {
   font-size: 24px;
   font-weight: 800;
@@ -303,6 +325,22 @@
   padding: 20px;
 }
 
+.saveEventBtn {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+}
+
 .eventInfo h4 {
   font-size: 17px;
   font-weight: 700;
@@ -405,7 +443,7 @@
 .filterClose {
   background-color: transparent;
   border: none;
-  font-size: 20px;
+  font-size: 30px;
   cursor: pointer;
   z-index: 10;
   transition: all 0.2s ease;
@@ -439,6 +477,10 @@
   color: var(--text-primary);
   transition: all 0.2s ease;
   outline: none;
+}
+
+.filterGroup:last-child {
+  margin-bottom: 200px;
 }
 
 .applyFilterBtn {
@@ -559,7 +601,11 @@
 }
 
 .actionLikeEvent:hover {
-  color: var(--primary);
+  color: #cd4025;
+}
+
+.actionLikeEvent_active {
+  color: #cd4025;
 }
 
 .actionShareEvent:hover {
@@ -732,6 +778,10 @@
     z-index: 150;
   }
 
+  .sidebarClose {
+    display: block;
+  }
+
   .sidebar.active {
     transform: translateX(0);
   }
@@ -856,3 +906,101 @@
   font-weight: 700;
   color: var(--primary);
 } */
+
+
+.quickFilters {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: calc(100% - 40px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-light) transparent;
+}
+
+.quickFilters::-webkit-scrollbar {
+  height: 4px;
+}
+
+.quickFilters::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quickFilters::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 2px;
+}
+
+.quickFilters::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+.quickFilterBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.quickFilterBtn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary-light);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.quickFilterBtn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.quickFilterBtn span:first-child {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .quickFilters {
+    bottom: 16px;
+    left: 10px;
+    gap: 6px;
+    max-width: calc(100% - 24px);
+  }
+
+  .quickFilterBtn {
+    padding: 6px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .quickFilterBtn span:first-child {
+    font-size: 14px;
+  }
+}
+
+/* Khi sidebar mở trên mobile */
+@media (max-width: 768px) {
+  .sidebar.active ~ .content .quickFilters {
+    display: none;
+  }
+}

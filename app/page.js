@@ -219,6 +219,20 @@ export default function MainPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTypes, setSelectedTypes] = useState([]); 
 
+  const [userLocation, setUserLocation] = useState(null);
+  const [savedEvents, setSavedEvents] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return JSON.parse(localStorage.getItem('saved_events') || '[]');
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const [quickFilter, setQuickFilter] = useState('all');
+
   const loadTimeoutRef = useRef(null);
   const mapActionsRef = useRef(null);
   const isLoadingRef = useRef(false);
@@ -398,7 +412,7 @@ export default function MainPage() {
     })
   };
 
-  const loadEvents = useCallback(async (bounds = null) => {
+  const loadEvents = useCallback(async (bounds = null, forceReload = false) => {
 
     if (isLoadingRef.current) {
       console.log('Already loading, skip...');
@@ -411,7 +425,7 @@ export default function MainPage() {
       allEventsRef.current = cachedEvents;
     }
 
-    if (bounds && !needsLoading(bounds, loadedBounds)) {
+    if (bounds && !forceReload && !needsLoading(bounds, loadedBounds)) {
       console.log('Bounds already loaded, skip...');
       return;
     }
@@ -420,7 +434,7 @@ export default function MainPage() {
     setIsLoading(true);
 
     try {
-      // const filtersParams = filters;
+      const filtersParams = filters;
       const params = new URLSearchParams();
       
       if (bounds) {
@@ -429,12 +443,8 @@ export default function MainPage() {
         setLoadedBounds(prev => [...prev, expandedBounds]);
       }
 
-      // if (filtersParams.search) params.append('search', filtersParams.search);
+      params.append('search', filtersParams.search);
       params.append('status', 'all');
-      // if (filtersParams.popularity && filtersParams.popularity !== 'all') params.append('popularity', filtersParams.popularity);
-      // if (filtersParams.ticketType && filtersParams.ticketType !== 'all') params.append('ticketType', filtersParams.ticketType);
-      // if (filtersParams.types && filtersParams.types.length > 0) params.append('types', filtersParams.types.join(',')); // Join array into comma-separated string
-      // if (filtersParams.date) params.append('date', filtersParams.date);
 
       const response = await axiosInstance.get(`/events?${params.toString()}`);
       
@@ -451,17 +461,42 @@ export default function MainPage() {
       isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [filters.search, filters.status, filters.popularity, filters.ticketType, filters.types, filters.date, expandBounds, needsLoading, loadedBounds, getFromCache, mergeEvents, saveToCache]); // ✅ Chỉ giữ filters cần thiết
+  }, [expandBounds, needsLoading, loadedBounds, getFromCache, mergeEvents, saveToCache]); // ✅ Chỉ giữ filters cần thiết
 
+  useEffect(() => {
+    setLoadedBounds([]);
+    
+    const timeoutId = setTimeout(() => {
+      loadEvents(null, true);
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [filters.search]);
 
   const applyFilters = useCallback(() => {
     let filtered = [...allEvents];
 
+    if (quickFilter === 'saved') {
+      filtered = filtered.filter(e => savedEvents.includes(e.id));
+    } else if (quickFilter === 'today') {
+      const now = new Date();
+      const vietnamDate = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+      const today = vietnamDate.toISOString().split('T')[0];
+      
+      filtered = filtered.filter(e => {
+        const eventDateTime = new Date(e.startTime);
+        const eventVietnamDate = new Date(eventDateTime.getTime() + (7 * 60 * 60 * 1000));
+        const eventDate = eventVietnamDate.toISOString().split('T')[0];
+        
+        return eventDate === today;
+      });
+    }
+
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(e =>
-        e.title.toLowerCase().includes(searchLower) ||
-        e.address.toLowerCase().includes(searchLower)
+        e.title?.toLowerCase().includes(searchLower) ||
+        e.address?.toLowerCase().includes(searchLower)
       );
     }
 
@@ -501,9 +536,7 @@ export default function MainPage() {
     }
 
     setFilteredEvents(filtered);
-
-    
-  }, [allEvents, filters]);
+  }, [allEvents, filters, quickFilter, savedEvents]);
 
   useEffect(() => {
     applyFilters();
@@ -564,6 +597,7 @@ export default function MainPage() {
       if (focusMap && mapActionsRef.current?.focusOnEvent) {
         // Focus vào map và mở popup
         mapActionsRef.current.focusOnEvent(eventId);
+        setShowSidebar(false);
       } else {
         // Mở modal như cũ
         setCurrentEvent(event);
@@ -575,6 +609,73 @@ export default function MainPage() {
   const closeModal = () => {
     setCurrentEvent(null);
   };
+
+  const toggleSaveEvent = useCallback((eventId) => {
+    setSavedEvents(prev => {
+      const newSaved = prev.includes(eventId)
+        ? prev.filter(id => id !== eventId)
+        : [...prev, eventId];
+      
+      try {
+        localStorage.setItem('saved_events', JSON.stringify(newSaved));
+      } catch (e) {
+        console.error('Failed to save:', e);
+      }
+      
+      return newSaved;
+    });
+  }, []);
+
+  const handleMyLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert('Trình duyệt không hỗ trợ định vị');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ latitude, longitude });
+        
+        if (mapActionsRef.current?.setViewToCity) {
+          mapActionsRef.current.setViewToCity([latitude, longitude], 15);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        alert('Không thể truy cập vị trí. Vui lòng cho phép truy cập vị trí trong cài đặt trình duyệt.');
+      }
+    );
+  }, []);
+
+  const getDistance = useCallback((lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of Earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }, []);
+
+  const shareEvent = useCallback((event) => {
+    const shareData = {
+      title: event.title,
+      text: `Tham gia sự kiện: ${event.title}`,
+      url: `${window.location.origin}?event=${event.id}`
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(err => console.log('Share failed:', err));
+    } else {
+      // Fallback: copy link
+      navigator.clipboard.writeText(shareData.url)
+        .then(() => alert('Đã sao chép link!'))
+        .catch(() => alert('Không thể chia sẻ'));
+    }
+  }, []);
 
   const now = new Date();
 
@@ -622,7 +723,10 @@ export default function MainPage() {
         {/* Sidebar */}
         <div className={`${styles.sidebar} ${showSidebar ? styles.active : ''}`}>
           <div className={styles.sidebarHeader}>
-            <h2 className={styles.sidebarTitle}>Khám phá sự kiện</h2>
+            <div className={styles.sidebarHeaderMain}>
+              <h2 className={styles.sidebarHeaderH2}>Khám phá sự kiện</h2>
+              <button className={styles.sidebarClose} onClick={() => setShowSidebar(!showSidebar)}>✕</button>
+            </div>
             <p className={styles.sidebarSubtitle}>Tìm kiếm trải nghiệm độc đáo xung quanh bạn</p>
           </div>
 
@@ -631,7 +735,7 @@ export default function MainPage() {
               <img className={styles.searchIcon} src="/assets/icons/search-icon.svg" alt="Search Events" />
               <input
                 type="text"
-                placeholder="Tìm kiếm sự kiện..."
+                placeholder="Tìm sự kiện, nghệ sĩ..."
                 value={filters.search}
                 onChange={handleSearchChange}
               />
@@ -655,28 +759,53 @@ export default function MainPage() {
               filteredEvents.map((event) => {
                 const eventDate = new Date(event.startTime);
                 const isPast = eventDate < now;
+                const isSaved = savedEvents.includes(event.id);
+
+                let distance = null;
+                if (userLocation && event.latitude && event.longitude) {
+                  distance = getDistance(
+                    userLocation.latitude,
+                    userLocation.longitude,
+                    event.latitude,
+                    event.longitude
+                  );
+                }
                 
                 return (
                   <div
                     key={event.id}
                     className={styles.eventItem}
                     style={{ opacity: isPast ? 0.6 : 1 }}
-                    onClick={() => openModal(event.id, true)} 
+                    onClick={() => openModal(event.id, event.type == 1)} 
                   >
                     <div 
                       className={styles.eventImg}
                       style={{ backgroundImage: `url(${event.bannerURL})` }}
                     >
                       <div className={styles.eventBadge}>
-                        {isPast ? 'Đã qua' : 'Sắp diễn'}
+                        {isPast ? 'Đã qua' : 'Sắp diễn ra'}
                       </div>
+                      {isSaved && <button
+                        className={styles.saveEventBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSaveEvent(event.id);
+                        }}
+                      >
+                        ❤️
+                      </button>}
                     </div>
                     <div className={styles.eventInfo}>
                       <h4>{event.title}</h4>
                       <div className={styles.eventMeta}>
                         <div className={styles.eventMetaItem}>
                           <span>📍</span>
-                          <span>{event.address}</span>
+                          <span>{event.type == 1 ? event.address : 'Online'}</span>
+                          {distance !== null && (
+                            <span style={{ marginLeft: '4px', color: 'var(--primary)', fontWeight: 600 }}>
+                              ({distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`})
+                            </span>
+                          )}
                         </div>
                         <div className={styles.eventMetaItem}>
                           <span>📅</span>
@@ -703,11 +832,39 @@ export default function MainPage() {
           events={filteredEvents}
           onBoundsChange={handleBoundsChange}
           onMarkerClick={mapActionsRef}
-        />
+          savedEvents={savedEvents}
+          userLocation={userLocation}
+        >
+          <div className={styles.quickFilters}>
+            <button 
+              className={`${styles.quickFilterBtn} ${quickFilter === 'all' ? styles.active : ''}`}
+              onClick={() => setQuickFilter('all')}
+            >
+              <span>🗺️</span>
+              <span>Tất cả</span>
+            </button>
+            <button 
+              className={`${styles.quickFilterBtn} ${quickFilter === 'saved' ? styles.active : ''}`}
+              onClick={() => setQuickFilter('saved')}
+            >
+              <span>❤️</span>
+              <span>Yêu thích</span>
+            </button>
+            <button 
+              className={`${styles.quickFilterBtn} ${quickFilter === 'today' ? styles.active : ''}`}
+              onClick={() => setQuickFilter('today')}
+            >
+              <span>📅</span>
+              <span>Hôm nay</span>
+            </button>
+          </div>
+        </MapView>
+
+        
 
         <button 
           className={styles.locationBtn}
-          onClick={() => {console.log('location');}}
+          onClick={handleMyLocation}
         >
           <img style={{height: '18px', width: '18px'}} src="/assets/icons/my-location-icon.svg" alt="Refresh Page" />
         </button>
@@ -729,7 +886,7 @@ export default function MainPage() {
 
         <div className={styles.filterBody}>
           <div className={styles.filterGroup}>
-            <label>Ngày tổ chức</label>
+            <label>Ngày diễn ra</label>
             <DatePicker
               selected={selectedDate}
               onChange={(date) => {
@@ -743,7 +900,7 @@ export default function MainPage() {
               }}
               dateFormat="dd/MM/yyyy"
               locale="vi"
-              placeholderText="Chọn ngày"
+              placeholderText="Chọn ngày diễn ra sự kiện"
               className={styles.datePickerInput}
               isClearable
               showMonthDropdown
@@ -764,7 +921,7 @@ export default function MainPage() {
               }}
               options={typeOptions}
               styles={filterMultiSelectStyles}
-              placeholder="Chọn thể loại..."
+              placeholder="Concert, workshop, hội thảo..."
               isSearchable={true}
               isMulti={true} // ✅ Enable multi-select
               closeMenuOnSelect={false} // Giữ menu mở khi chọn
@@ -773,54 +930,54 @@ export default function MainPage() {
           </div>
 
           <div className={styles.filterGroup}>
-            <label>Hình thức tổ chức</label>
+            <label>Hình thức tổ chức (Trực tiếp hoặc online...)</label>
             <Select
               instanceId="mode-select" // ✅ Fix hydration error
               value={modeOptions.find(opt => opt.value === filters.mode)}
               onChange={(option) => setFilters(prev => ({ ...prev, mode: option.value }))}
               options={modeOptions}
               styles={filterSelectStyles}
-              placeholder="Chọn trạng thái"
+              placeholder="Trực tiếp hoặc online..."
               isSearchable={false}
             />
           </div>
           
           <div className={styles.filterGroup}>
-            <label>Trạng thái</label>
+            <label>Trạng thái (Sắp diễn ra, đã qua...)</label>
             <Select
               instanceId="status-select" // ✅ Fix hydration error
               value={statusOptions.find(opt => opt.value === filters.status)}
               onChange={(option) => setFilters(prev => ({ ...prev, status: option.value }))}
               options={statusOptions}
               styles={filterSelectStyles}
-              placeholder="Chọn trạng thái"
+              placeholder="Sắp diễn ra, đã qua..."
               isSearchable={false}
             />
 
           </div>
           
           <div className={styles.filterGroup}>
-            <label>Độ nổi bật</label>
+            <label>Độ nổi bật (Phổ biến, nổi bật...)</label>
             <Select
               instanceId="popularity-select"
               value={popularityOptions.find(opt => opt.value === filters.popularity)}
               onChange={(option) => setFilters(prev => ({ ...prev, popularity: option.value }))}
               options={popularityOptions}
               styles={filterSelectStyles}
-              placeholder="Chọn độ nổi bật"
+              placeholder="Phổ biến, nổi bật..."
               isSearchable={false}
             />
           </div>
 
           <div className={styles.filterGroup}>
-            <label>Loại vé</label>
+            <label>Loại vé (Miễn phí, trả phí...)</label>
             <Select
               instanceId="ticket-select"
               value={ticketOptions.find(opt => opt.value === filters.ticketType)}
               onChange={(option) => setFilters(prev => ({ ...prev, ticketType: option.value }))}
               options={ticketOptions}
               styles={filterSelectStyles}
-              placeholder="Chọn loại vé"
+              placeholder="Miễn phí, trả phí..."
               isSearchable={false}
             />
           </div>
@@ -867,7 +1024,7 @@ export default function MainPage() {
 
             <div className={styles.modalBody}>
               <div className={styles.modalTopTitle}>
-                <span>{new Date(currentEvent.startTime).toLocaleString('vi-VN', {
+                <span style={{display: 'flex', alignItems: 'center', gap: '4px'}}><img style={{height: '16px', width: '16px'}} src="/assets/icons/time-icon.svg" alt="Like Event" /> {new Date(currentEvent.startTime).toLocaleString('vi-VN', {
                     weekday: 'long',   // Thứ hai, Thứ ba, ...
                     day: '2-digit',    // 01–31
                     month: '2-digit',  // 01–12
@@ -876,8 +1033,8 @@ export default function MainPage() {
                     minute: '2-digit', // 00–59
                   })}</span>
                 <div className={styles.modalTopTitleAction}>
-                  <span className={styles.actionLikeEvent} style={{display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer'}}><img style={{height: '16px', width: '16px'}} src="/assets/icons/love-icon.svg" alt="Like Event" /> Yêu thích</span>
-                  <span className={styles.actionShareEvent} style={{display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer'}}><img style={{height: '16px', width: '16px'}} src="/assets/icons/share-icon.svg" alt="Like Event" /> Chia sẻ</span>
+                  <span onClick={() => toggleSaveEvent(currentEvent.id)} className={`${styles.actionLikeEvent} ${savedEvents.includes(currentEvent.id) ? styles.actionLikeEvent_active : ''}`} style={{display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer'}}> {savedEvents.includes(currentEvent.id) ? <img style={{height: '16px', width: '16px'}} src="/assets/icons/loved-icon.svg" alt="Like Event" /> : <img style={{height: '16px', width: '16px'}} src="/assets/icons/love-icon.svg" alt="Like Event" />} Yêu thích</span>
+                  <span onClick={() => shareEvent(currentEvent)} className={styles.actionShareEvent} style={{display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer'}}><img style={{height: '16px', width: '16px'}} src="/assets/icons/share-icon.svg" alt="Like Event" /> Chia sẻ</span>
                 </div>
               </div>
               <h2 className={styles.modalTitle}>{currentEvent.title}</h2>
@@ -897,8 +1054,8 @@ export default function MainPage() {
                   })}</p>
               </div>
               <div className={styles.modalBodySection}>
-                <p className={styles.modalBodySectionHead}>Địa điểm <a href='#'>+ Mở bản đồ</a></p>
-                <p className={styles.modalBodySectionContent}>&nbsp;&nbsp;📍&nbsp;&nbsp;&nbsp;{currentEvent.address}</p>
+                <p className={styles.modalBodySectionHead}>Địa điểm {currentEvent.type == 1 ? <a href='#'>+ Mở bản đồ</a> : ''}</p>
+                <p className={styles.modalBodySectionContent}>&nbsp;&nbsp;📍&nbsp;&nbsp;&nbsp;{currentEvent.type == 1 ? currentEvent.address : 'Online'}</p>
               </div>
               <div 
                 className={`${styles.modalDescription} ql-editor`}

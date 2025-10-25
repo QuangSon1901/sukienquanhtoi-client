@@ -50,3 +50,114 @@
 .viewDetailBtn:hover {
   background: var(--primary-dark);
 }
+
+.mapLegend {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 149;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.mapLegend.collapsed {
+  padding: 8px 12px;
+}
+
+.mapLegend:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.legendTitle {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mapLegend.expanded .legendTitle {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.legendToggle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.legendItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.legendDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+  .mapLegend {
+    top: 10px;
+    right: 10px;
+    padding: 10px 12px;
+  }
+
+  .mapLegend.collapsed {
+    padding: 6px 10px;
+  }
+
+  .legendTitle {
+    font-size: 13px;
+  }
+
+  .legendToggle {
+    font-size: 16px;
+  }
+
+  .legendItem {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .legendDot {
+    width: 12px;
+    height: 12px;
+  }
+}
