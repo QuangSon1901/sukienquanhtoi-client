@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -358,6 +359,7 @@
   right: -380px;
   width: 380px;
   height: 100vh;
+  height: 100dvh;
   background: var(--surface);
   box-shadow: var(--shadow-xl);
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -725,6 +727,7 @@
     left: 0;
     width: 90vw;
     height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
     transform: translateX(-100%);
     z-index: 150;
   }
@@ -757,6 +760,7 @@
     right: -100%;
     top: 0;
     height: 100vh;
+    height: 100dvh;
   }
 
   .modalContent {
