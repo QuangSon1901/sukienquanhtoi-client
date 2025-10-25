@@ -5,6 +5,13 @@ import dynamic from 'next/dynamic';
 import axiosInstance from '@/lib/axios';
 import styles from './page.module.css';
 
+import Select from 'react-select';
+import DatePicker from 'react-datepicker';
+import { registerLocale } from 'react-datepicker';
+import vi from 'date-fns/locale/vi';
+
+registerLocale('vi', vi);
+
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
   loading: () => <div className={styles.mapLoading}>Đang tải bản đồ...</div>
@@ -13,6 +20,181 @@ const MapView = dynamic(() => import('@/components/MapView'), {
 const CACHE_KEY = 'sukienquanhtoi_events';
 const CACHE_EXPIRY_KEY = 'sukienquanhtoi_cache_expiry';
 const CACHE_DURATION = 24 * 60 * 60 * 1000;
+
+const cityOptions = [
+  { value: 'hanoi', label: 'TP. Hà Nội' },
+  { value: 'hcm', label: 'TP. Hồ Chí Minh' },
+  { value: 'haiphong', label: 'TP. Hải Phòng' },
+  { value: 'danang', label: 'TP. Đà Nẵng' },
+  { value: 'cantho', label: 'TP. Cần Thơ' },
+  { value: 'angiang', label: 'An Giang' },
+  { value: 'bacgiang', label: 'Bắc Giang' },
+  { value: 'backan', label: 'Bắc Kạn' },
+  { value: 'baclieu', label: 'Bạc Liêu' },
+  { value: 'bacninh', label: 'Bắc Ninh' },
+  { value: 'bariavungtau', label: 'Bà Rịa - Vũng Tàu' },
+  { value: 'bentre', label: 'Bến Tre' },
+  { value: 'binhdinh', label: 'Bình Định' },
+  { value: 'binhduong', label: 'Bình Dương' },
+  { value: 'binhphuoc', label: 'Bình Phước' },
+  { value: 'binhthuan', label: 'Bình Thuận' },
+  { value: 'camau', label: 'Cà Mau' },
+  { value: 'caobang', label: 'Cao Bằng' },
+  { value: 'daklak', label: 'Đắk Lắk' },
+  { value: 'daknong', label: 'Đắk Nông' },
+  { value: 'dienbien', label: 'Điện Biên' },
+  { value: 'dongnai', label: 'Đồng Nai' },
+  { value: 'dongthap', label: 'Đồng Tháp' },
+  { value: 'gialai', label: 'Gia Lai' },
+  { value: 'hagiang', label: 'Hà Giang' },
+  { value: 'hanam', label: 'Hà Nam' },
+  { value: 'hatinh', label: 'Hà Tĩnh' },
+  { value: 'haiduong', label: 'Hải Dương' },
+  { value: 'haugiang', label: 'Hậu Giang' },
+  { value: 'hoabinh', label: 'Hòa Bình' },
+  { value: 'hungyen', label: 'Hưng Yên' },
+  { value: 'khanhhoa', label: 'Khánh Hòa' },
+  { value: 'kiengiang', label: 'Kiên Giang' },
+  { value: 'kontum', label: 'Kon Tum' },
+  { value: 'laichau', label: 'Lai Châu' },
+  { value: 'lamdong', label: 'Lâm Đồng' },
+  { value: 'langson', label: 'Lạng Sơn' },
+  { value: 'laocai', label: 'Lào Cai' },
+  { value: 'longan', label: 'Long An' },
+  { value: 'namdinh', label: 'Nam Định' },
+  { value: 'nghean', label: 'Nghệ An' },
+  { value: 'ninhbinh', label: 'Ninh Bình' },
+  { value: 'ninhthuan', label: 'Ninh Thuận' },
+  { value: 'phutho', label: 'Phú Thọ' },
+  { value: 'phuyen', label: 'Phú Yên' },
+  { value: 'quangbinh', label: 'Quảng Bình' },
+  { value: 'quangnam', label: 'Quảng Nam' },
+  { value: 'quangngai', label: 'Quảng Ngãi' },
+  { value: 'quangninh', label: 'Quảng Ninh' },
+  { value: 'quangtri', label: 'Quảng Trị' },
+  { value: 'soctrang', label: 'Sóc Trăng' },
+  { value: 'sonla', label: 'Sơn La' },
+  { value: 'tayninh', label: 'Tây Ninh' },
+  { value: 'thaibinh', label: 'Thái Bình' },
+  { value: 'thainguyen', label: 'Thái Nguyên' },
+  { value: 'thanhhoa', label: 'Thanh Hóa' },
+  { value: 'thuathienhue', label: 'Thừa Thiên - Huế' },
+  { value: 'tiengiang', label: 'Tiền Giang' },
+  { value: 'travinh', label: 'Trà Vinh' },
+  { value: 'tuyenquang', label: 'Tuyên Quang' },
+  { value: 'vinhlong', label: 'Vĩnh Long' },
+  { value: 'vinhphuc', label: 'Vĩnh Phúc' },
+  { value: 'yenbai', label: 'Yên Bái' }
+];
+
+const cityCoords = {
+  hanoi: [21.028, 105.834],
+  hcm: [10.776, 106.700],
+  haiphong: [20.865, 106.683],
+  danang: [16.047, 108.206],
+  cantho: [10.045, 105.746],
+  
+  angiang: [10.521, 105.125],
+  bacgiang: [21.273, 106.194],
+  backan: [22.146, 105.834],
+  baclieu: [9.294, 105.724],
+  bacninh: [21.186, 106.076],
+  bariavungtau: [10.411, 107.136],
+  bentre: [10.243, 106.375],
+  binhdinh: [13.782, 109.219],
+  binhduong: [11.173, 106.671],
+  binhphuoc: [11.751, 106.723],
+  binhthuan: [10.980, 108.261],
+  camau: [9.176, 105.152],
+  caobang: [22.666, 106.259],
+  daklak: [12.710, 108.237],
+  daknong: [12.264, 107.609],
+  dienbien: [21.386, 103.018],
+  dongnai: [10.957, 107.013],
+  dongthap: [10.456, 105.634],
+  gialai: [13.983, 108.000],
+  hagiang: [22.823, 104.983],
+  hanam: [20.541, 105.917],
+  hatinh: [18.343, 105.905],
+  haiduong: [20.938, 106.330],
+  haugiang: [9.783, 105.467],
+  hoabinh: [20.817, 105.337],
+  hungyen: [20.646, 106.051],
+  khanhhoa: [12.258, 109.053],
+  kiengiang: [10.012, 105.080],
+  kontum: [14.350, 108.000],
+  laichau: [22.400, 103.400],
+  lamdong: [11.940, 108.460],
+  langson: [21.855, 106.758],
+  laocai: [22.485, 103.970],
+  longan: [10.695, 106.243],
+  namdinh: [20.438, 106.177],
+  nghean: [18.673, 105.692],
+  ninhbinh: [20.254, 105.975],
+  ninhthuan: [11.567, 108.988],
+  phutho: [21.323, 105.402],
+  phuyen: [13.088, 109.093],
+  quangbinh: [17.468, 106.623],
+  quangnam: [15.539, 108.019],
+  quangngai: [15.120, 108.792],
+  quangninh: [21.006, 107.292],
+  quangtri: [16.747, 107.188],
+  soctrang: [9.602, 105.973],
+  sonla: [21.327, 103.905],
+  tayninh: [11.323, 106.110],
+  thaibinh: [20.450, 106.340],
+  thainguyen: [21.593, 105.848],
+  thanhhoa: [19.807, 105.776],
+  thuathienhue: [16.463, 107.590],
+  tiengiang: [10.449, 106.342],
+  travinh: [9.933, 106.345],
+  tuyenquang: [21.820, 105.214],
+  vinhlong: [10.253, 105.972],
+  vinhphuc: [21.309, 105.606],
+  yenbai: [21.705, 104.875],
+};
+
+const statusOptions = [
+  { value: 'upcoming', label: 'Sắp diễn ra' },
+  { value: 'past', label: 'Đã qua' },
+  { value: 'all', label: 'Tất cả' }
+];
+
+const modeOptions = [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'online', label: 'Sự kiện online' },
+  { value: 'offline', label: 'Sự kiện offline' },
+];
+
+const typeOptions = [
+  { value: 'concert', label: '🎵 Concert' },
+  { value: 'tea_room', label: '☕ Phòng trà' },
+  { value: 'workshop', label: '🎨 Workshop' },
+  { value: 'seminar', label: '📚 Hội thảo' },
+  { value: 'exhibition', label: '🖼️ Triển lãm' },
+  { value: 'festival', label: '🎉 Lễ hội' },
+  { value: 'sport', label: '⚽ Thể thao' },
+  { value: 'food', label: '🍜 Ẩm thực' },
+  { value: 'charity', label: '❤️ Từ thiện' },
+  { value: 'networking', label: '🤝 Giao lưu' },
+  { value: 'theater', label: '🎭 Sân khấu' },
+  { value: 'movie', label: '🎬 Phim ảnh' },
+  { value: 'market', label: '🛍️ Chợ/Hội chợ' },
+  { value: 'education', label: '📖 Giáo dục' },
+  { value: 'tech', label: '💻 Công nghệ' },
+  { value: 'other', label: '📌 Khác' }
+];
+
+const popularityOptions = [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'hot', label: 'HOT' }
+];
+
+const ticketOptions = [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'paid', label: 'Có phí' },
+  { value: 'free', label: 'Miễn phí' }
+];
 
 export default function MainPage() {
   const [allEvents, setAllEvents] = useState([]);
@@ -24,13 +206,19 @@ export default function MainPage() {
     search: '',
     type: '',
     date: '',
-    status: 'upcoming'
+    mode: 'all',
+    types: '',
+    status: 'upcoming',
+    popularity: 'all',
+    ticketType: 'all'
   });
   const [showSidebar, setShowSidebar] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTypes, setSelectedTypes] = useState([]); 
+
   const loadTimeoutRef = useRef(null);
   const mapActionsRef = useRef(null);
   const isLoadingRef = useRef(false);
@@ -39,12 +227,6 @@ export default function MainPage() {
   useEffect(() => {
     allEventsRef.current = allEvents;
   }, [allEvents]);
-
-  const cityCoords = {
-    hcm: [10.776, 106.700],
-    hanoi: [21.028, 105.834],
-    danang: [16.047, 108.206],
-  };
 
   // Cache functions
   const saveToCache = useCallback((events) => {
@@ -104,7 +286,120 @@ export default function MainPage() {
     return true;
   };
 
+  const customSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      fontSize: '14px',
+      fontWeight: 500,
+      padding: '2px 8px',
+      border: state.isFocused ? '2px solid var(--primary)' : '2px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
+      background: 'var(--surface)',
+      boxShadow: state.isFocused ? '0 0 0 3px rgba(99, 102, 241, 0.1)' : 'none',
+      minHeight: '44px',
+      '&:hover': {
+        borderColor: 'var(--primary-light)'
+      }
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: '14px',
+      fontWeight: 500,
+      backgroundColor: state.isSelected 
+        ? 'var(--primary)' 
+        : state.isFocused 
+          ? 'var(--surface-hover)' 
+          : 'white',
+      color: state.isSelected ? 'white' : 'var(--text-primary)',
+      '&:active': {
+        backgroundColor: 'var(--primary-light)'
+      }
+    }),
+    menu: (base) => ({
+      ...base,
+      borderRadius: 'var(--radius-md)',
+      boxShadow: 'var(--shadow-lg)',
+      border: '2px solid var(--border)'
+    })
+  };
+
+  // Style riêng cho filter panel - nhỏ gọn hơn
+  const filterSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      fontSize: '14px',
+      fontWeight: 500,
+      padding: '0px 8px',
+      border: state.isFocused ? '2px solid var(--primary)' : '2px solid var(--border)',
+      borderRadius: 'var(--radius-lg)',
+      background: 'var(--surface-dim)',
+      boxShadow: state.isFocused ? '0 0 0 4px rgba(99, 102, 241, 0.1)' : 'none',
+      minHeight: '44px',
+      '&:hover': {
+        borderColor: 'var(--primary-light)'
+      }
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: '14px',
+      fontWeight: 500,
+      backgroundColor: state.isSelected 
+        ? 'var(--primary)' 
+        : state.isFocused 
+          ? 'var(--surface-hover)' 
+          : 'white',
+      color: state.isSelected ? 'white' : 'var(--text-primary)',
+      '&:active': {
+        backgroundColor: 'var(--primary-light)'
+      }
+    }),
+    menu: (base) => ({
+      ...base,
+      borderRadius: 'var(--radius-md)',
+      boxShadow: 'var(--shadow-lg)',
+      border: '2px solid var(--border)'
+    })
+  };
+
+  const filterMultiSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      fontSize: '14px',
+      fontWeight: 500,
+      padding: '4px 8px',
+      border: state.isFocused ? '2px solid var(--primary)' : '2px solid var(--border)',
+      borderRadius: 'var(--radius-lg)',
+      background: 'var(--surface-dim)',
+      boxShadow: state.isFocused ? '0 0 0 4px rgba(99, 102, 241, 0.1)' : 'none',
+      minHeight: '44px',
+      '&:hover': {
+        borderColor: 'var(--primary-light)'
+      }
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: '14px',
+      fontWeight: 500,
+      backgroundColor: state.isSelected 
+        ? 'var(--primary)' 
+        : state.isFocused 
+          ? 'var(--surface-hover)' 
+          : 'white',
+      color: state.isSelected ? 'white' : 'var(--text-primary)',
+      '&:active': {
+        backgroundColor: 'var(--primary-light)'
+      }
+    }),
+    menu: (base) => ({
+      ...base,
+      borderRadius: 'var(--radius-md)',
+      boxShadow: 'var(--shadow-lg)',
+      border: '2px solid var(--border)'
+    })
+  };
+
   const loadEvents = useCallback(async (bounds = null) => {
+
     if (isLoadingRef.current) {
       console.log('Already loading, skip...');
       return;
@@ -125,6 +420,7 @@ export default function MainPage() {
     setIsLoading(true);
 
     try {
+      // const filtersParams = filters;
       const params = new URLSearchParams();
       
       if (bounds) {
@@ -133,10 +429,13 @@ export default function MainPage() {
         setLoadedBounds(prev => [...prev, expandedBounds]);
       }
 
-      if (filters.search) params.append('search', filters.search);
-      if (filters.status) params.append('status', filters.status);
+      // if (filtersParams.search) params.append('search', filtersParams.search);
+      // if (filtersParams.status) params.append('status', filtersParams.status);
+      // if (filtersParams.popularity && filtersParams.popularity !== 'all') params.append('popularity', filtersParams.popularity);
+      // if (filtersParams.ticketType && filtersParams.ticketType !== 'all') params.append('ticketType', filtersParams.ticketType);
+      // if (filtersParams.types && filtersParams.types.length > 0) params.append('types', filtersParams.types.join(',')); // Join array into comma-separated string
+      // if (filtersParams.date) params.append('date', filtersParams.date);
 
-      console.log('Calling API:', `/events?${params.toString()}`);
       const response = await axiosInstance.get(`/events?${params.toString()}`);
       
       if (response.data.success) {
@@ -152,7 +451,7 @@ export default function MainPage() {
       isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [filters.search, filters.status, expandBounds, needsLoading, loadedBounds, getFromCache, mergeEvents, saveToCache]); // ✅ Chỉ giữ filters cần thiết
+  }, [filters.search, filters.status, filters.popularity, filters.ticketType, filters.types, filters.date, expandBounds, needsLoading, loadedBounds, getFromCache, mergeEvents, saveToCache]); // ✅ Chỉ giữ filters cần thiết
 
 
   const applyFilters = useCallback(() => {
@@ -170,6 +469,10 @@ export default function MainPage() {
       filtered = filtered.filter(e => e.type === filters.type);
     }
 
+    if (filters.types && filters.types.length > 0) {
+      filtered = filtered.filter(e => filters.types.includes(e.type));
+    }
+
     if (filters.date) {
       filtered = filtered.filter(e => {
         const eventDate = new Date(e.startTime).toISOString().split('T')[0];
@@ -185,7 +488,21 @@ export default function MainPage() {
       });
     }
 
+    if (filters.mode && filters.mode !== 'all') {
+      filtered = filtered.filter(e => e.mode === filters.mode);
+    }
+
+    if (filters.popularity && filters.popularity !== 'all') {
+      filtered = filtered.filter(e => e.isHot === (filters.popularity === 'hot'));
+    }
+
+    if (filters.ticketType && filters.ticketType !== 'all') {
+      filtered = filtered.filter(e => e.ticketType === filters.ticketType);
+    }
+
     setFilteredEvents(filtered);
+
+    
   }, [allEvents, filters]);
 
   useEffect(() => {
@@ -266,25 +583,20 @@ export default function MainPage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <button 
-            className={styles.menuToggle}
-            onClick={() => setShowSidebar(!showSidebar)}
-          >
-            ☰
-          </button>
           <div className={styles.logo}>
-            <a href="/" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}><img style={{height: '2.5rem'}} src="/assets/logos/logo-header.png?v1.0.0" alt="NiceTech" /></a>
+            <a href="/" style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}><img style={{height: '2.5rem'}} src="/assets/logos/logo-header.png?v1.0.1" alt="NiceTech" /></a>
           </div>
-          <select 
-            className={styles.citySelect}
-            value={filters.city}
-            onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
-          >
-            <option value="hcm">TP. Hồ Chi Minh</option>
-            <option value="hanoi">TP. Hà Nội</option>
-            <option value="danang">TP. Đà Nẵng</option>
-            <option value="phuyen">Phú Yên</option>
-          </select>
+          <Select
+            instanceId="city-select"
+            value={cityOptions.find(opt => opt.value === filters.city)}
+            onChange={(option) => setFilters(prev => ({ ...prev, city: option.value }))}
+            options={cityOptions}
+            styles={customSelectStyles}
+            placeholder="Chọn thành phố"
+            isSearchable
+            className="react-select-container"
+            classNamePrefix="react-select"
+          />
         </div>
         <div className={styles.navLinks}>
           <a href="/home">Trang chủ</a>
@@ -392,49 +704,152 @@ export default function MainPage() {
           onBoundsChange={handleBoundsChange}
           onMarkerClick={mapActionsRef}
         />
+
+        <button 
+          className={styles.locationBtn}
+          onClick={() => {console.log('location');}}
+        >
+          <img style={{height: '18px', width: '18px'}} src="/assets/icons/my-location-icon.svg" alt="Refresh Page" />
+        </button>
+
+        <button 
+          className={styles.menuToggle}
+          onClick={() => setShowSidebar(!showSidebar)}
+        >
+          ☰
+        </button>
       </div>
 
       {/* Filter Panel */}
       <div className={`${styles.filterPanel} ${showFilter ? styles.active : ''}`}>
-        <h3>Bộ lọc sự kiện</h3>
-        
-        <div className={styles.filterGroup}>
-          <label htmlFor="statusFilter">Trạng thái</label>
-          <select
-            id="statusFilter"
-            value={filters.status}
-            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+        <div className={styles.filterHead}>
+          <h3 style={{marginBottom: '0'}}>Bộ lọc sự kiện</h3>
+          <button className={styles.filterClose} onClick={() => {setShowFilter(false);}}>✕</button>
+        </div>
+
+        <div className={styles.filterBody}>
+          <div className={styles.filterGroup}>
+            <label>Ngày tổ chức</label>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => {
+                setSelectedDate(date);
+                if (date) {
+                  const formattedDate = date.toISOString().split('T')[0];
+                  setFilters(prev => ({ ...prev, date: formattedDate }));
+                } else {
+                  setFilters(prev => ({ ...prev, date: '' }));
+                }
+              }}
+              dateFormat="dd/MM/yyyy"
+              locale="vi"
+              placeholderText="Chọn ngày"
+              className={styles.datePickerInput}
+              isClearable
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode="select"
+            />
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label>Thể loại sự kiện</label>
+            <Select
+              instanceId="type-select"
+              value={selectedTypes}
+              onChange={(selected) => {
+                setSelectedTypes(selected || []);
+                const typeValues = selected ? selected.map(opt => opt.value) : [];
+                setFilters(prev => ({ ...prev, types: typeValues }));
+              }}
+              options={typeOptions}
+              styles={filterMultiSelectStyles}
+              placeholder="Chọn thể loại..."
+              isSearchable={true}
+              isMulti={true} // ✅ Enable multi-select
+              closeMenuOnSelect={false} // Giữ menu mở khi chọn
+              hideSelectedOptions={false} // Hiện option đã chọn với checkmark
+            />
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label>Hình thức tổ chức</label>
+            <Select
+              instanceId="mode-select" // ✅ Fix hydration error
+              value={modeOptions.find(opt => opt.value === filters.mode)}
+              onChange={(option) => setFilters(prev => ({ ...prev, mode: option.value }))}
+              options={modeOptions}
+              styles={filterSelectStyles}
+              placeholder="Chọn trạng thái"
+              isSearchable={false}
+            />
+          </div>
+          
+          <div className={styles.filterGroup}>
+            <label>Trạng thái</label>
+            <Select
+              instanceId="status-select" // ✅ Fix hydration error
+              value={statusOptions.find(opt => opt.value === filters.status)}
+              onChange={(option) => setFilters(prev => ({ ...prev, status: option.value }))}
+              options={statusOptions}
+              styles={filterSelectStyles}
+              placeholder="Chọn trạng thái"
+              isSearchable={false}
+            />
+
+          </div>
+          
+          <div className={styles.filterGroup}>
+            <label>Độ nổi bật</label>
+            <Select
+              instanceId="popularity-select"
+              value={popularityOptions.find(opt => opt.value === filters.popularity)}
+              onChange={(option) => setFilters(prev => ({ ...prev, popularity: option.value }))}
+              options={popularityOptions}
+              styles={filterSelectStyles}
+              placeholder="Chọn độ nổi bật"
+              isSearchable={false}
+            />
+          </div>
+
+          <div className={styles.filterGroup}>
+            <label>Loại vé</label>
+            <Select
+              instanceId="ticket-select"
+              value={ticketOptions.find(opt => opt.value === filters.ticketType)}
+              onChange={(option) => setFilters(prev => ({ ...prev, ticketType: option.value }))}
+              options={ticketOptions}
+              styles={filterSelectStyles}
+              placeholder="Chọn loại vé"
+              isSearchable={false}
+            />
+          </div>
+
+        </div>
+
+        <div className={styles.filterFoot}>
+          
+          <button 
+            className={styles.applyFilterBtn}
+            onClick={() => {
+              applyFilters();
+              setShowFilter(false);
+            }}
           >
-            <option value="upcoming">Sắp diễn ra</option>
-            <option value="past">Đã qua</option>
-            <option value="all">Tất cả</option>
-          </select>
+            Áp dụng bộ lọc
+          </button>
+          <button 
+            className={styles.clearFilterBtn}
+            onClick={() => {
+              setFilters({city: 'hcm',search: '',type: '',date: '',mode: 'all',types: '',status: 'upcoming',popularity: 'all',ticketType: 'all'});
+              setSelectedDate(null);
+              setSelectedTypes([]);
+              setShowFilter(false);
+            }}
+          >
+            Xóa lọc
+          </button>
         </div>
-
-        <div className={styles.filterGroup}>
-          <label htmlFor="date">Ngày tổ chức</label>
-          <input
-            type="date"
-            id="date"
-            value={filters.date}
-            onChange={(e) => setFilters(prev => ({ ...prev, date: e.target.value }))}
-          />
-        </div>
-
-        <button 
-          className={styles.applyFilterBtn}
-          onClick={() => {
-            applyFilters();
-            setShowFilter(false);
-          }}
-        >
-          Áp dụng bộ lọc
-        </button>
-        <button 
-          className={styles.clearFilterBtn}
-        >
-          Xóa lọc
-        </button>
       </div>
 
       {/* Modal */}

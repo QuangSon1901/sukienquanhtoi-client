@@ -16,7 +16,7 @@
   height: 72px;
   flex-shrink: 0;
   position: relative;
-  z-index: 100;
+  z-index: 150;
   box-shadow: var(--shadow-sm);
 }
 
@@ -53,9 +53,38 @@
   box-shadow: var(--shadow-md);
   align-items: center;
   justify-content: center;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 151;
 }
 
 .menuToggle:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.locationBtn {
+  display: flex;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 151;
+}
+
+.locationBtn:hover {
   background: var(--primary-dark);
   transform: scale(1.05);
 }
@@ -116,6 +145,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
 .sidebar {
@@ -324,16 +354,39 @@
 
 .filterPanel {
   position: fixed;
-  top: 72px;
+  top: 0;
   right: -380px;
   width: 380px;
-  height: calc(100vh - 72px);
+  height: 100vh;
   background: var(--surface);
   box-shadow: var(--shadow-xl);
-  padding: 32px;
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   overflow-y: auto;
+}
+
+.filterBody {
+  padding: 0 32px;
+}
+
+.filterHead {
+  padding: 32px 32px 24px;
+  background-color: #fff;
+  z-index: 151;
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.filterFoot {
+  padding: 0 32px 32px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 151;
 }
 
 .filterPanel.active {
@@ -343,8 +396,21 @@
 .filterPanel h3 {
   font-size: 22px;
   font-weight: 800;
-  margin: 0 0 24px;
+  margin: 0;
   color: var(--text-primary);
+}
+
+.filterClose {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.filterClose:hover {
+  color: var(--primary);
 }
 
 .filterGroup {
@@ -362,7 +428,7 @@
 .filterGroup select,
 .filterGroup input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-radius: var(--radius-lg);
   border: 2px solid var(--border);
   font-size: 14px;
@@ -635,6 +701,10 @@
     display: flex;
   }
 
+  .locationBtn {
+    bottom: 78px;
+  }
+
   .logo {
     font-size: 16px;
   }
@@ -685,8 +755,8 @@
   .filterPanel {
     width: 100%;
     right: -100%;
-    top: 64px;
-    height: calc(100vh - 64px);
+    top: 0;
+    height: 100vh;
   }
 
   .modalContent {
@@ -710,3 +780,75 @@
     padding: 16px;
   }
 }
+
+:global(.react-datepicker-wrapper) {
+  width: 100%;
+}
+
+.filterGroup .datePickerInput {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border);
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--surface-dim);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  outline: none;
+  cursor: pointer;
+}
+
+.filterGroup  .datePickerInput:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+:global(.react-datepicker__current-month) {
+  margin-bottom: 10px !important;
+}
+
+:global(.react-datepicker__month-dropdown-container) {
+  margin-right: 2px !important;
+}
+
+:global(.react-datepicker__year-dropdown-container) {
+  margin-left: 2px !important;
+}
+
+/* :global(.react-datepicker) {
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  font-family: inherit;
+}
+
+:global(.react-datepicker__header) {
+  background-color: var(--primary);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+:global(.react-datepicker__current-month),
+:global(.react-datepicker__day-name) {
+  color: white;
+  font-weight: 600;
+}
+
+:global(.react-datepicker__day--selected),
+:global(.react-datepicker__day--keyboard-selected) {
+  background-color: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+:global(.react-datepicker__day:hover) {
+  background-color: var(--surface-hover);
+  border-radius: var(--radius-md);
+}
+
+:global(.react-datepicker__day--today) {
+  font-weight: 700;
+  color: var(--primary);
+} */
